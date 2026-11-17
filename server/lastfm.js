@@ -288,11 +288,16 @@ async function getCountryTracks(user) {
       }
       const [topAlbum, topAlbumCover] = topAlbumKey ? topAlbumKey.split('|||') : ['', ''];
       const color = await extractColor(topAlbumCover || null);
+      const proxyCover = topAlbumCover ? `/api/image-proxy?url=${encodeURIComponent(topAlbumCover)}` : '';
 
       result[country] = {
-        tracks: data.tracks,
+        tracks: data.tracks.map((t) => ({
+          ...t,
+          albumCover: t.albumCover ? `/api/image-proxy?url=${encodeURIComponent(t.albumCover)}` : '',
+        })),
         topAlbum,
-        topAlbumCover,
+        topAlbumCover: proxyCover,
+        topAlbumCoverOriginal: topAlbumCover,
         color,
         trackCount: data.tracks.length,
       };

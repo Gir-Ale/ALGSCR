@@ -7,11 +7,15 @@ require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') }
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fetch = require('node-fetch');
 const { getRecentTracks, getCountryTracks } = require('./lastfm');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const LASTFM_USER = process.env.LASTFM_USER || 'GIRAL4';
+
+// In-memory image cache so repeated requests never hit Last.fm
+const imageCache = new Map();
 
 // ---------------------------------------------------------------------------
 // Middleware
@@ -25,6 +29,42 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 // ---------------------------------------------------------------------------
 // Routes
 // ---------------------------------------------------------------------------
+
+/**
+ * GET /api/image-proxy
+ * Proxies and caches images from Last.fm so the browser never talks to Last.fm directly.
+ */
+app.get('/api/image-proxy', async (req, res) => {
+  const imageUrl = req.query.url;
+  if (!imageUrl) {
+    return res.status(400).send('Missing url parameter');
+  }
+
+  if (imageCache.has(imageUrl)) {
+    const cached = imageCache.get(imageUrl);
+    res.setHeader('Content-Type', cached.contentType);
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    return res.send(cached.buffer);
+  }
+
+  try {
+    const upstream = await fetch(imageUrl, { timeout: 10000 });
+    if (!upstream.ok) {
+      return res.status(upstream.status).send('Failed to fetch image');
+    }
+    const contentType = upstream.headers.get('content-type') || 'image/jpeg';
+    const buffer = await upstream.buffer();
+
+    imageCache.set(imageUrl, { contentType, buffer });
+
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    res.send(buffer);
+  } catch (err) {
+    console.error('[/api/image-proxy error]', err.message);
+    res.status(502).send('Error loading image');
+  }
+});
 
 /**
  * GET /api/recent-tracks

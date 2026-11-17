@@ -1,12 +1,11 @@
 /**
  * ALGSCR — globe.js
- * High-performance 3D interactive music globe powered by Globe.gl.
+ * High-performance 3D interactive music globe powered by Globe.gl & Three.js.
  *
  * Features:
  *  - 3D sphere with night earth texture & atmospheric glow
- *  - High-precision country borders and extruded 3D polygon meshes
- *  - Dynamic album cover dominant color mapping for listened countries
- *  - Extrusion altitude for countries with listening history
+ *  - Country polygons with true 3D extrusion for listened countries
+ *  - Mapped album cover image texture onto the surface of listened countries
  *  - Smooth orbital controls with auto-rotation and interactive pause
  *  - Centered camera transition on country click
  *  - Rich interactive tooltips and detail panel integration
@@ -29,8 +28,65 @@
   let countriesFeatures = [];
   let autoRotateTimeout = null;
 
+  // Texture loader & material cache for album covers
+  const materialCache = new Map();
+  let textureLoader = null;
+
   // ---------------------------------------------------------------------------
-  // Helper: Convert hex color to rgba / darker side color
+  // Helper: Create or retrieve textured material for a country's top album
+  // ---------------------------------------------------------------------------
+  function getCountryCapMaterial(feat) {
+    if (!feat || !feat._musicData || !feat._musicData.topAlbumCover) {
+      return null;
+    }
+
+    const THREE = window.THREE || {};
+    if (!THREE.TextureLoader) {
+      return null;
+    }
+
+    const coverUrl = feat._musicData.topAlbumCover;
+    if (materialCache.has(coverUrl)) {
+      return materialCache.get(coverUrl);
+    }
+
+    if (!textureLoader) {
+      textureLoader = new THREE.TextureLoader();
+    }
+
+    // Load texture from our server proxy
+    const texture = textureLoader.load(
+      coverUrl,
+      () => {
+        // Once texture arrives, trigger a material update on the globe
+        if (world) {
+          world.polygonCapMaterial(world.polygonCapMaterial());
+        }
+      },
+      undefined,
+      (err) => {
+        console.warn('Could not load album art texture for', feat._countryName, err);
+      }
+    );
+
+    texture.wrapS = THREE.ClampToEdgeWrapping || 1001;
+    texture.wrapT = THREE.ClampToEdgeWrapping || 1001;
+    texture.minFilter = THREE.LinearFilter || 1006;
+    texture.generateMipmaps = true;
+
+    // Use MeshLambertMaterial or MeshBasicMaterial so the album cover image is rendered on the country surface
+    const MaterialClass = THREE.MeshLambertMaterial || THREE.MeshBasicMaterial;
+    const mat = new MaterialClass({
+      map: texture,
+      side: THREE.DoubleSide || 2,
+    });
+
+    materialCache.set(coverUrl, mat);
+    return mat;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Helper: Convert hex color to darker side color for 3D extrusion walls
   // ---------------------------------------------------------------------------
   function getSideColor(hex) {
     if (!hex) return 'rgba(30, 80, 120, 0.7)';
@@ -39,7 +95,7 @@
     let r = Math.floor((parseInt(clean.substring(0, 2), 16) || 50) * 0.6);
     let g = Math.floor((parseInt(clean.substring(2, 4), 16) || 50) * 0.6);
     let b = Math.floor((parseInt(clean.substring(4, 6), 16) || 50) * 0.6);
-    return `rgba(${r}, ${g}, ${b}, 0.85)`;
+    return `rgba(${r}, ${g}, ${b}, 0.88)`;
   }
 
   function escapeHtml(str) {
@@ -137,14 +193,19 @@
       if (feat === hoveredCountry) return 0.015;
       return 0.005; // Normal base level
     })
+    .polygonCapMaterial(feat => {
+      // Maps the album cover image onto the country cap
+      return getCountryCapMaterial(feat);
+    })
     .polygonCapColor(feat => {
-      if (feat === activeCountry) return '#ffffff';
+      // Fallback color if capMaterial is null (or while texture is loading)
       if (feat._musicData) {
         return feat._musicData.color || '#4fc3f7';
       }
       return 'rgba(25, 42, 65, 0.72)';
     })
     .polygonSideColor(feat => {
+      // 3D side walls use the dominant album color
       if (feat._musicData) {
         return getSideColor(feat._musicData.color || '#4fc3f7');
       }
@@ -152,7 +213,7 @@
     })
     .polygonStrokeColor(feat => {
       if (feat === activeCountry) return '#ffffff';
-      if (feat._musicData) return 'rgba(255, 255, 255, 0.85)';
+      if (feat._musicData) return 'rgba(255, 255, 255, 0.9)';
       return 'rgba(70, 110, 150, 0.35)';
     })
     .polygonLabel(feat => {
@@ -161,13 +222,16 @@
         const count = feat._musicData.tracks ? feat._musicData.tracks.length : 0;
         const album = feat._musicData.topAlbum || 'Various Albums';
         const color = feat._musicData.color || '#4fc3f7';
+        const thumb = feat._musicData.topAlbumCover;
         return `
           <div class="globe-tooltip">
-            <div class="globe-tooltip-title">
-              <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:${color}; box-shadow:0 0 6px ${color}"></span>
-              ${escapeHtml(name)}
+            <div class="globe-tooltip-header">
+              ${thumb ? `<img src="${thumb}" class="globe-tooltip-thumb" alt="Album" />` : ''}
+              <div>
+                <div class="globe-tooltip-title">${escapeHtml(name)}</div>
+                <div class="globe-tooltip-sub">💿 ${escapeHtml(album)}</div>
+              </div>
             </div>
-            <div class="globe-tooltip-sub">💿 ${escapeHtml(album)}</div>
             <div class="globe-tooltip-badge" style="background: ${color}">
               🎵 ${count} scrobbled track${count !== 1 ? 's' : ''}
             </div>
@@ -184,7 +248,6 @@
     .onPolygonHover(hoverFeat => {
       hoveredCountry = hoverFeat;
       container.style.cursor = hoverFeat ? 'pointer' : 'grab';
-      // Trigger smooth altitude transition
       world.polygonAltitude(world.polygonAltitude());
     })
     .onPolygonClick((feat, event) => {
@@ -192,10 +255,8 @@
       selectCountry(feat);
     })
     .onGlobeClick(() => {
-      // Clicked on ocean or blank space
       activeCountry = null;
       world.polygonAltitude(world.polygonAltitude());
-      world.polygonCapColor(world.polygonCapColor());
       world.polygonStrokeColor(world.polygonStrokeColor());
       UI.hideCountryPanel();
     });
@@ -270,6 +331,8 @@
       if (feat) {
         feat._musicData = data;
         feat._countryName = countryName;
+        // Pre-warm material cache for this country's album cover
+        getCountryCapMaterial(feat);
         matchedCount++;
       } else {
         console.warn('Could not match listening country with map feature:', countryName);
@@ -278,7 +341,7 @@
 
     console.log(`Matched ${matchedCount} music countries on the 3D globe.`);
 
-    // Refresh polygon styling with newly attached music data
+    // Refresh polygon styling with newly attached music data & materials
     world.polygonsData([...countriesFeatures]);
 
     UI.hideLoading();
@@ -307,7 +370,6 @@
 
     // Refresh visual highlights
     world.polygonAltitude(world.polygonAltitude());
-    world.polygonCapColor(world.polygonCapColor());
     world.polygonStrokeColor(world.polygonStrokeColor());
 
     // Show side panel

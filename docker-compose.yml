@@ -6,6 +6,9 @@ services:
     ports:
       - "3000:3000"
     env_file:
-      - .env
+      - path: .env
+        required: false
     environment:
       - NODE_ENV=production
+      - LASTFM_USER=${LASTFM_USER:-GIRAL4}
+      - LASTFM_API_KEY=${LASTFM_API_KEY}

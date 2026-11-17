@@ -26,14 +26,62 @@ html, body {
   overflow: hidden;
 }
 
-/* ---------- Globe canvas ---------- */
-#globe-canvas {
-  display: block;
+/* ---------- Globe canvas & container ---------- */
+#globe-container {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100vw;
   height: 100vh;
   cursor: grab;
+  z-index: 1;
 }
-#globe-canvas:active { cursor: grabbing; }
+#globe-container:active { cursor: grabbing; }
+
+/* Tooltip */
+.globe-tooltip {
+  background: rgba(10, 16, 28, 0.92);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: #fff;
+  font-family: inherit;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+  max-width: 240px;
+}
+.globe-tooltip-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.globe-tooltip-sub {
+  font-size: 0.78rem;
+  color: #90a4ae;
+  margin-top: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.globe-tooltip-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #07090f;
+}
+.globe-tooltip-muted {
+  font-size: 0.75rem;
+  color: #607d8b;
+  margin-top: 2px;
+}
 
 /* ---------- Header ---------- */
 .app-header {

@@ -42,11 +42,30 @@ const UI = (() => {
   function showCountryPanel(countryName, countryData) {
     const { tracks = [], topAlbum = '', topAlbumCover = '', color = '#4fc3f7' } = countryData;
 
+    // Deduplicate songs by title and artist, tracking play count and latest date
+    const uniqueMap = new Map();
+    for (const track of tracks) {
+      const key = `${(track.name || '').trim().toLowerCase()}|||${(track.artist || '').trim().toLowerCase()}`;
+      if (!uniqueMap.has(key)) {
+        uniqueMap.set(key, {
+          ...track,
+          plays: 1,
+        });
+      } else {
+        const item = uniqueMap.get(key);
+        item.plays += 1;
+        if (track.date && (!item.date || new Date(track.date) > new Date(item.date))) {
+          item.date = track.date;
+        }
+      }
+    }
+    const uniqueTracks = Array.from(uniqueMap.values());
+
     panelName.textContent  = countryName;
     panelAlbum.textContent = topAlbum || 'Various albums';
     panelDot.style.background = color;
     panelDot.style.boxShadow = `0 0 12px ${color}`;
-    panelCount.textContent = `${tracks.length} recent track${tracks.length !== 1 ? 's' : ''}`;
+    panelCount.textContent = `${uniqueTracks.length} unique song${uniqueTracks.length !== 1 ? 's' : ''} (${tracks.length} scrobble${tracks.length !== 1 ? 's' : ''})`;
 
     if (topAlbumCover) {
       panelArt.src = topAlbumCover;
@@ -55,22 +74,33 @@ const UI = (() => {
       panelArt.classList.add('hidden');
     }
 
-    // Build track list (show at most 50)
+    // Build deduplicated track list (show at most 50)
     trackList.innerHTML = '';
-    const display = tracks.slice(0, 50);
+    const display = uniqueTracks.slice(0, 50);
     for (const track of display) {
       const li = document.createElement('li');
       li.className = 'track-item';
 
+      const row = document.createElement('div');
+      row.className = 'track-name-row';
+
       const name = document.createElement('span');
       name.className = 'track-name';
       name.textContent = track.name;
+      row.appendChild(name);
+
+      if (track.plays > 1) {
+        const badge = document.createElement('span');
+        badge.className = 'track-plays-badge';
+        badge.textContent = `${track.plays}x`;
+        row.appendChild(badge);
+      }
 
       const artist = document.createElement('span');
       artist.className = 'track-artist';
       artist.textContent = track.artist;
 
-      li.appendChild(name);
+      li.appendChild(row);
       li.appendChild(artist);
 
       if (track.date) {
@@ -85,12 +115,12 @@ const UI = (() => {
       trackList.appendChild(li);
     }
 
-    if (tracks.length > 50) {
+    if (uniqueTracks.length > 50) {
       const more = document.createElement('li');
       more.className = 'track-item';
       more.style.textAlign = 'center';
       more.style.color = 'var(--text-muted)';
-      more.textContent = `… and ${tracks.length - 50} more`;
+      more.textContent = `… and ${uniqueTracks.length - 50} more`;
       trackList.appendChild(more);
     }
 

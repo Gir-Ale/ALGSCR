@@ -282,12 +282,29 @@ html, body {
   transition: background 0.15s;
 }
 .track-item:hover { background: rgba(255,255,255,0.09); }
+.track-name-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
 .track-name {
   font-size: 0.88rem;
   font-weight: 600;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.track-plays-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 10px;
+  background: rgba(79, 195, 247, 0.15);
+  color: var(--accent);
+  border: 1px solid rgba(79, 195, 247, 0.35);
+  flex-shrink: 0;
+  letter-spacing: 0.02em;
 }
 .track-artist {
   font-size: 0.76rem;

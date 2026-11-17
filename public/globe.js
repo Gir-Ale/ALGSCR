@@ -219,10 +219,16 @@
     .polygonLabel(feat => {
       const name = feat.properties.ADMIN || feat.properties.NAME || 'Country';
       if (feat._musicData) {
-        const count = feat._musicData.tracks ? feat._musicData.tracks.length : 0;
+        const tracks = feat._musicData.tracks || [];
+        const uniqueCount = new Set(tracks.map(t => (t.name || '').toLowerCase().trim() + '|||' + (t.artist || '').toLowerCase().trim())).size;
+        const totalCount = tracks.length;
         const album = feat._musicData.topAlbum || 'Various Albums';
         const color = feat._musicData.color || '#4fc3f7';
         const thumb = feat._musicData.topAlbumCover;
+        const countLabel = uniqueCount === totalCount
+          ? `${uniqueCount} song${uniqueCount !== 1 ? 's' : ''}`
+          : `${uniqueCount} song${uniqueCount !== 1 ? 's' : ''} (${totalCount} plays)`;
+
         return `
           <div class="globe-tooltip">
             <div class="globe-tooltip-header">
@@ -233,7 +239,7 @@
               </div>
             </div>
             <div class="globe-tooltip-badge" style="background: ${color}">
-              🎵 ${count} scrobbled track${count !== 1 ? 's' : ''}
+              🎵 ${countLabel}
             </div>
           </div>
         `;

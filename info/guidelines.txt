@@ -1,0 +1,37 @@
+What your music looks like
+Due Wed 18 Nov, 18:00
+· Updated on 17 Nov, 14:02
+
+Build a web app that turns the songs you listened to recently into something worth looking at. The data comes from Last.fm, through your own server.
+
+The idea is yours
+A list of album covers is the starting point, not the goal. Decide what your listening looks like, and build that. Some directions:
+
+A record player, a shelf, a room or a city that changes with what you play.
+Colours taken from the covers, mixed into a painting of your day.
+A clock or a timeline: when you listen, how much, and to what.
+A wall shared by friends, where each person has a place or a colour.
+For an example, see walloftrack.thomasjuldo.com: the last 24 hours drawn as a vinyl record. Don't copy it. Find your own form.
+
+Before you start
+At least one week before, create a free account on last.fm and connect your music app to it, so it has songs to show. Spotify connects from Last.fm's settings. For any other service, listen in the browser with the Web Scrobbler extension. Then create an API key at last.fm/api/account/create. The method you need is user.getRecentTracks.
+
+The rules
+The browser talks only to your server. Your server talks to Last.fm.
+The API key stays on the server, in an environment variable. It is never in the page, in the code, or in any commit.
+The server keeps Last.fm's answers for a short time (a cache), so many visitors don't mean many calls to Last.fm.
+When Last.fm fails, the page still says something useful.
+It works on a phone and on a laptop.
+docker compose up starts everything.
+Use any language and any library. You may work with an AI agent, but you explain every part on demo day.
+
+Hand in
+A public GitHub repository, with a README that says how to start the app.
+A three-minute demo in class: show it, say what idea you followed, and answer two questions about how it works.
+Done when
+ It shows my recent music in a form I chose, not only a list.
+ In the browser's Network tab, no request goes to Last.fm.
+ My key is nowhere on GitHub, in any commit.
+ Reloading the page twice in a row makes only one call to Last.fm.
+ With Last.fm unreachable, the page shows a message, not a blank screen.
+ It starts with docker compose up on a new copy of the repository.

@@ -1,0 +1,10 @@
+A website where the user can rotate a globe, the contry whose music he recently listen to light up in a different color and appear aliitle bit extruded from the rest of the globe, the contry color get change by the album cover of the most listen album of said contry, and when the user click on it he can see all the titles he listen to from there, pop up next to the map.
+
+we use last.fm api:
+
+Application name	ALGSCR
+API key	7d8d4950a66bc1e93e2e047d6825cf57
+Shared secret	b506df4f1d82b00c4aeaf7a96219ed61
+Registered to	GIRAL4
+
+the whole website needs to run on GitHub page, and respect the rules of the guidelines files

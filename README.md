@@ -1,15 +1,15 @@
-# 🌍 ALGSCR — Interactive Music Globe
+# ALGSCR Interactive Music Globe
 
 A web app that renders an interactive 3D globe where countries you've recently listened to music from light up, extruded and colored by the dominant color of your most-played album from that country. Click any country to see your listening history from there.
 
 ## Features
 
-- 🌐 **3D rotating globe** built with Three.js
-- 🎨 **Album-color-extracted country highlights** using `node-vibrant`
-- 📀 **Extruded highlighted countries** for visual depth
-- 🖱️ **Click any country** to see tracks listened from there
-- ⚡ **5-minute server-side cache** to minimize Last.fm API calls
-- 🐳 **Docker-ready** — one command to run
+-  **3D rotating globe** built with Three.js
+-  **Album-color-extracted country highlights** using `node-vibrant`
+-  **Extruded highlighted countries** for visual depth
+-  **Click any country** to see tracks listened from there
+-  **5-minute server-side cache** to minimize Last.fm API calls
+-  **Docker-ready** one command to run
 
 ## Quick Start
 

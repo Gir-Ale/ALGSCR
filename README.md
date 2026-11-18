@@ -43,7 +43,7 @@ node server/index.js
 
 This setup leaves the `visit-counter` project untouched and publishes ALGSCR
 on its own port, `3001`. It is served over HTTP at
-`http://student10M.wt.thomasjuldo.com:3001` (not HTTPS). On the server, clone
+`http://student10.wt.thomasjuldo.com:3001` (not HTTPS). On the server, clone
 the public repository and create the untracked `.env` file:
 
 ```bash

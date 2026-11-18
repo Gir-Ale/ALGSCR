@@ -52,11 +52,11 @@ cd ALGSCR
 nano .env
 ```
 
-Put the Last.fm credentials in `.env` (never commit this file):
+Put the Last.fm credentials in `.env`
 
 ```env
 LASTFM_API_KEY=your_lastfm_api_key
-LASTFM_USER=GIRAL4
+LASTFM_USER=name
 ```
 
 From the project directory on the server, start or update the app with:
@@ -74,7 +74,7 @@ unchanged and exposes the app to the internet only through Caddy.
 | Variable         | Description                     | Default  |
 |------------------|---------------------------------|----------|
 | `LASTFM_API_KEY` | Your Last.fm API key            | —        |
-| `LASTFM_USER`    | Last.fm username to display     | `GIRAL4` |
+| `LASTFM_USER`    | Last.fm username to display     | `name` |
 | `PORT`           | Port the server listens on      | `3000`   |
 
 ## API Endpoints

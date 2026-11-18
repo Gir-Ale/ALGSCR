@@ -79,10 +79,13 @@ Start ALGSCR; this connects its private app port to the existing Caddy network:
 docker compose -f docker-compose.yml -f compose.server.yaml up -d --build
 ```
 
-In `/root/visit-counter/Caddyfile`, add this handler inside the existing
-`student10.wt.thomasjuldo.com` block, **before** its catch-all `handle`:
+In `/root/visit-counter/Caddyfile`, add this redirect and handler inside the
+existing `student10.wt.thomasjuldo.com` block, **before** its catch-all `handle`:
 
 ```caddyfile
+@musicRoot path /music
+redir @musicRoot /music/ 308
+
 handle_path /music/* {
     reverse_proxy algscr:3000
 }
@@ -97,12 +100,14 @@ docker compose -f compose.yaml -f compose.server.yaml exec caddy \
   caddy reload --config /etc/caddy/Caddyfile
 ```
 
-Check `https://student10.wt.thomasjuldo.com/music/` and
-`https://student10.wt.thomasjuldo.com/`; the former should show ALGSCR and the
-latter should still show the visit-counter. For later updates, push from your
-computer, then run `git pull` and the ALGSCR Compose command on the server. The
-production override removes the app's public port mapping and keeps local
-development at `http://localhost:3000`.
+Check `https://student10.wt.thomasjuldo.com/music` (redirects to `/music/`),
+`https://student10.wt.thomasjuldo.com/music/`, and
+`https://student10.wt.thomasjuldo.com/`; the first should redirect to the
+second, which should show ALGSCR, while the root should still show the
+visit-counter. For later updates, push from your computer, then run `git pull`
+and the ALGSCR Compose command on the server. The production override removes
+the app's public port mapping and keeps local development at
+`http://localhost:3000`.
 
 ## Environment Variables
 

@@ -1,4 +1,6 @@
 student10.wt.thomasjuldo.com {
+	@musicRoot path /music
+	redir @musicRoot /music/ 308
 	handle_path /music/* {
 		reverse_proxy algscr:3000
 	}

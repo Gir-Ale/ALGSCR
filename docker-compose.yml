@@ -1,7 +1,6 @@
 services:
   algscr:
     build: .
-    container_name: algscr
     restart: unless-stopped
     ports:
       - "3000:3000"

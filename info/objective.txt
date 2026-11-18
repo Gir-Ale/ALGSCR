@@ -3,8 +3,8 @@ A website where the user can rotate a globe, the contry whose music he recently 
 we use last.fm api:
 
 Application name	ALGSCR
-API key	7d8d4950a66bc1e93e2e047d6825cf57
-Shared secret	b506df4f1d82b00c4aeaf7a96219ed61
+API key	[removed; use a server-side environment variable]
+Shared secret	[removed; use a server-side environment variable]
 Registered to	GIRAL4
 
 the whole website needs to run on GitHub page, and respect the rules of the guidelines files

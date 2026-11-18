@@ -1,0 +1,8 @@
+student10M.wt.thomasjuldo.com {
+	handle /api/* {
+		reverse_proxy algscr:3000
+	}
+	handle {
+		reverse_proxy algscr:3000
+	}
+}

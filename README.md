@@ -41,10 +41,10 @@ node server/index.js
 
 ### Deploy on the course server
 
-The production setup uses Caddy at `https://student10M.wt.thomasjuldo.com`.
-Only Caddy publishes ports 80 and 443; the app is reachable only inside the
-Compose network. On the server, clone the public repository and create the
-untracked `.env` file:
+This setup leaves the `visit-counter` project untouched and publishes ALGSCR
+on its own port, `3001`. It is served over HTTP at
+`http://student10M.wt.thomasjuldo.com:3001` (not HTTPS). On the server, clone
+the public repository and create the untracked `.env` file:
 
 ```bash
 git clone https://github.com/Gir-Ale/ALGSCR.git
@@ -57,17 +57,20 @@ Put the Last.fm credentials in `.env` (never commit this file):
 ```env
 LASTFM_API_KEY=your_lastfm_api_key
 LASTFM_USER=GIRAL4
+ALGSCR_HOST_PORT=3001
 ```
 
-From the project directory on the server, start or update the app with:
+Start ALGSCR:
 
 ```bash
 docker compose -f docker-compose.yml -f compose.server.yaml up -d --build
 ```
 
-For updates, run `git pull` in the project directory, then run the same Compose
-command again. The Compose override keeps the local `localhost:3000` setup
-unchanged and exposes the app to the internet only through Caddy.
+For ALGSCR updates, run `git pull` in its project directory, then run the
+ALGSCR Compose command above again. The production override leaves local
+development on `localhost:3000` unchanged. If port 3001 is not reachable,
+the server or network firewall must allow/forward TCP 3001; Docker-published
+ports may bypass Ubuntu's UFW rules.
 
 ## Environment Variables
 

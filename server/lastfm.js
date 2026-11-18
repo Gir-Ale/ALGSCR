@@ -8,6 +8,7 @@ const { extractColor } = require('./colorExtract');
 
 const LASTFM_BASE = 'https://ws.audioscrobbler.com/2.0/';
 const CACHE_TTL = 300; // 5 minutes
+const APP_BASE_PATH = (process.env.APP_BASE_PATH || '').replace(/\/+$/, '');
 
 // ---------------------------------------------------------------------------
 // Comprehensive Country Keywords & Demonyms dictionary
@@ -406,14 +407,14 @@ async function getCountryTracks(user) {
       const [topAlbum, topAlbumCover] = topAlbumKey ? topAlbumKey.split('|||') : ['', ''];
       const color = await extractColor(topAlbumCover || null);
       const proxyCover = topAlbumCover
-        ? `/api/image-proxy?url=${encodeURIComponent(topAlbumCover)}`
+        ? `${APP_BASE_PATH}/api/image-proxy?url=${encodeURIComponent(topAlbumCover)}`
         : '';
 
       result[country] = {
         tracks: data.tracks.map((t) => ({
           ...t,
           albumCover: t.albumCover
-            ? `/api/image-proxy?url=${encodeURIComponent(t.albumCover)}`
+            ? `${APP_BASE_PATH}/api/image-proxy?url=${encodeURIComponent(t.albumCover)}`
             : '',
         })),
         topAlbum,

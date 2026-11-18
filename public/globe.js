@@ -181,7 +181,7 @@
   UI.showLoading('Initializing 3D World Globe…');
 
   world = Globe()(container)
-    .globeImageUrl('/earth-night.jpg')
+    .globeImageUrl(new URL('earth-night.jpg', document.baseURI).href)
     .backgroundColor('#07090f')
     .showAtmosphere(true)
     .atmosphereColor('#4fc3f7')
@@ -301,7 +301,7 @@
   // Step 2: Fetch Local Country Boundaries (GeoJSON)
   // ---------------------------------------------------------------------------
   try {
-    const geoRes = await fetch('/countries.geojson');
+    const geoRes = await fetch(new URL('countries.geojson', document.baseURI));
     if (!geoRes.ok) throw new Error('Failed to load local geographic data');
     const geoData = await geoRes.json();
     countriesFeatures = geoData.features || [];
@@ -320,7 +320,7 @@
   // ---------------------------------------------------------------------------
   UI.showLoading('Retrieving your music journey from Last.fm…');
   try {
-    const musicRes = await fetch('/api/country-tracks');
+    const musicRes = await fetch(new URL('api/country-tracks', document.baseURI));
     if (!musicRes.ok) throw new Error(`Server returned status ${musicRes.status}`);
     const json = await musicRes.json();
 

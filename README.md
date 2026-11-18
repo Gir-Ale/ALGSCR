@@ -41,10 +41,14 @@ node server/index.js
 
 ### Deploy on the course server
 
-This setup leaves the `visit-counter` project untouched and publishes ALGSCR
-on its own port, `3001`. It is served over HTTP at
-`http://student10.wt.thomasjuldo.com:3001` (not HTTPS). On the server, clone
-the public repository and create the untracked `.env` file:
+The visit-counter remains at `https://student10.wt.thomasjuldo.com/`. ALGSCR
+is served beside it at
+`https://student10.wt.thomasjuldo.com/music/`. This uses the visit-counter's
+existing Caddy container; it does not start another listener on ports 80/443.
+The `Caddyfile` in this repository is a reference; add only its `/music` handler
+to the existing visit-counter Caddyfile, rather than replacing that file.
+
+For a first deployment, clone the repository and create `.env` on the server:
 
 ```bash
 git clone https://github.com/Gir-Ale/ALGSCR.git
@@ -52,32 +56,60 @@ cd ALGSCR
 nano .env
 ```
 
-Put the Last.fm credentials in `.env`
+Set your Last.fm credentials in `.env`:
 
 ```env
 LASTFM_API_KEY=your_lastfm_api_key
-<<<<<<< HEAD
-LASTFM_USER=name
-ALGSCR_HOST_PORT=3001
+LASTFM_USER=your_lastfm_username
+```
 
-Start ALGSCR:
+Keep the existing `.env` credentials when updating; remove the obsolete
+`ALGSCR_HOST_PORT` setting if you added it for the old port-based setup. Push
+the updated project to GitHub from your computer, then update the server copy:
+
+```bash
+cd ~/ALGSCR
+git pull
+docker network inspect visit-counter_default
+```
+
+Start ALGSCR; this connects its private app port to the existing Caddy network:
 
 ```bash
 docker compose -f docker-compose.yml -f compose.server.yaml up -d --build
 ```
 
-For ALGSCR updates, run `git pull` in its project directory, then run the
-ALGSCR Compose command above again. The production override leaves local
-development on `localhost:3000` unchanged. If port 3001 is not reachable,
-the server or network firewall must allow/forward TCP 3001; Docker-published
-ports may bypass Ubuntu's UFW rules.
+In `/root/visit-counter/Caddyfile`, add this handler inside the existing
+`student10.wt.thomasjuldo.com` block, **before** its catch-all `handle`:
+
+```caddyfile
+handle_path /music/* {
+    reverse_proxy algscr:3000
+}
+```
+
+Keep the existing `/api/*` and catch-all handlers unchanged. Then reload the
+existing Caddy from the visit-counter directory:
+
+```bash
+cd ~/visit-counter
+docker compose -f compose.yaml -f compose.server.yaml exec caddy \
+  caddy reload --config /etc/caddy/Caddyfile
+```
+
+Check `https://student10.wt.thomasjuldo.com/music/` and
+`https://student10.wt.thomasjuldo.com/`; the former should show ALGSCR and the
+latter should still show the visit-counter. For later updates, push from your
+computer, then run `git pull` and the ALGSCR Compose command on the server. The
+production override removes the app's public port mapping and keeps local
+development at `http://localhost:3000`.
 
 ## Environment Variables
 
 | Variable         | Description                     | Default  |
 |------------------|---------------------------------|----------|
 | `LASTFM_API_KEY` | Your Last.fm API key            | —        |
-| `LASTFM_USER`    | Last.fm username to display     | `name` |
+| `LASTFM_USER`    | Last.fm username to display     | `GIRAL4` |
 | `PORT`           | Port the server listens on      | `3000`   |
 
 ## API Endpoints
@@ -102,7 +134,8 @@ Browser ──► Express Server (Node.js :3000)
                                                  (cached 5 min)
 ```
 
-**The API key never leaves the server.** The browser only talks to `localhost:3000`.
+**The API key never leaves the server.** The browser uses the same-origin app
+and API; it never calls Last.fm directly.
 
 ## Project Structure
 

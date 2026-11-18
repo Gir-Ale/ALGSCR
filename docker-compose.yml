@@ -3,11 +3,11 @@ services:
     build: .
     restart: unless-stopped
     ports:
-      - "${ALGSCR_HOST_PORT:-3000}:3000"
+      - "3000:3000"
     env_file:
       - path: .env
         required: false
     environment:
-      - NODE_ENV=production
-      - LASTFM_USER=${LASTFM_USER:-GIRAL4}
-      - LASTFM_API_KEY=${LASTFM_API_KEY}
+      NODE_ENV: production
+      LASTFM_USER: ${LASTFM_USER:-GIRAL4}
+      LASTFM_API_KEY: ${LASTFM_API_KEY}

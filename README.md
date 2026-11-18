@@ -52,12 +52,16 @@ cd ALGSCR
 nano .env
 ```
 
-Put the Last.fm credentials in `.env` (never commit this file):
+Put the Last.fm credentials in `.env`
 
 ```env
 LASTFM_API_KEY=your_lastfm_api_key
+<<<<<<< HEAD
 LASTFM_USER=GIRAL4
 ALGSCR_HOST_PORT=3001
+=======
+LASTFM_USER=name
+>>>>>>> a27dfc6b2fb85608ed99aa710e8ff9b400910c48
 ```
 
 Start ALGSCR:
@@ -77,7 +81,7 @@ ports may bypass Ubuntu's UFW rules.
 | Variable         | Description                     | Default  |
 |------------------|---------------------------------|----------|
 | `LASTFM_API_KEY` | Your Last.fm API key            | —        |
-| `LASTFM_USER`    | Last.fm username to display     | `GIRAL4` |
+| `LASTFM_USER`    | Last.fm username to display     | `name` |
 | `PORT`           | Port the server listens on      | `3000`   |
 
 ## API Endpoints

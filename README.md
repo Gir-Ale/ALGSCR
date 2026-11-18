@@ -57,12 +57,8 @@ Put the Last.fm credentials in `.env`
 ```env
 LASTFM_API_KEY=your_lastfm_api_key
 <<<<<<< HEAD
-LASTFM_USER=GIRAL4
-ALGSCR_HOST_PORT=3001
-=======
 LASTFM_USER=name
->>>>>>> a27dfc6b2fb85608ed99aa710e8ff9b400910c48
-```
+ALGSCR_HOST_PORT=3001
 
 Start ALGSCR:
 
